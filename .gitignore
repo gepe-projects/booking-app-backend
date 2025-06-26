@@ -1,0 +1,6 @@
+/tmp
+
+.env
+
+key/private.pem
+key/public.pem
