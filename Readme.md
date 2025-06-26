@@ -1,3 +1,7 @@
+# about
+di buat agar mudah migrasi ke microservice jadi akan banyak menghindari join antar table.
+sebisa mungkin ambil data seperlunya lewat depedency injection aja
+
 # install golang migrate
 [HOW TO INSTALL](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
 
