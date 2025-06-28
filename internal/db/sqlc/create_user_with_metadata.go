@@ -8,7 +8,7 @@ import (
 )
 
 type UserMetadata struct {
-	Device string `json:"device"`
+	UserAgent string `json:"user_agent"`
 }
 
 type CreateuserWithMetadataParams struct {

@@ -6,6 +6,9 @@ MIGRATION_DIR=internal/db/migrations
 dev:
 	@air
 
+sqlc:
+	sqlc generate
+
 ## Jalankan migrasi ke atas (latest)
 migrate-up:
 	$(MIGRATE_CMD) -path $(MIGRATION_DIR) -database "$(DB_URL)" up
@@ -21,7 +24,13 @@ ifndef name
 endif
 	$(MIGRATE_CMD) create -ext sql -dir $(MIGRATION_DIR) -seq $(name)
 
+# generate pem file
+priv-key:
+	openssl genpkey -algorithm RSA -out ./key/private.pem -pkeyopt rsa_keygen_bits:2048
+
+pub-key:
+	openssl rsa -pubout -in ./key/private.pem -out ./key/public.pem
 
 
 
-.PHONY: dev migrate-up migrate-down migrate-create
+.PHONY: dev sqlc migrate-up migrate-down migrate-create priv-key pub-key

@@ -14,7 +14,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, req dto.CreateUserRequest) (dto.UserResponse, error)
+	CreateUser(ctx context.Context, req dto.RegisterUserRequest) (dto.UserResponse, error)
 	ListUsers(ctx context.Context, arg db.ListUsersParams) ([]dto.UserResponse, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (dto.UserResponse, error)
 	GetUserWithMetadata(ctx context.Context, id uuid.UUID) (db.GetUserWithMetadataRow, error)
@@ -30,7 +30,7 @@ func NewUserService(userRepo ur.UserRepository) UserService {
 	}
 }
 
-func (us *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest) (dto.UserResponse, error) {
+func (us *userService) CreateUser(ctx context.Context, req dto.RegisterUserRequest) (dto.UserResponse, error) {
 	arg := db.CreateuserWithMetadataParams{
 		CreateUserParams: db.CreateUserParams{
 			ID:          req.ID,
@@ -41,7 +41,7 @@ func (us *userService) CreateUser(ctx context.Context, req dto.CreateUserRequest
 			AvatarUrl:   helper.StringToPGText(req.AvatarURL),
 		},
 		UserMetadata: db.UserMetadata{
-			Device: "web",
+			UserAgent: "",
 		},
 	}
 

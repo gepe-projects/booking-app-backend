@@ -27,7 +27,7 @@ func NewUserHandler(validator *validator.Validate, userService userService.UserS
 }
 
 func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var req dto.CreateUserRequest
+	var req dto.RegisterUserRequest
 	if err := helper.BindRequest(r, &req); err != nil {
 		helper.WriteError(w, http.StatusBadRequest, err.Error())
 		return
@@ -66,7 +66,7 @@ func (h *userHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helper.WriteSuccess(w, users)
+	helper.WriteSuccess(w, http.StatusOK, users)
 }
 
 func (h *userHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -81,5 +81,5 @@ func (h *userHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helper.WriteSuccess(w, user)
+	helper.WriteSuccess(w, http.StatusOK, user)
 }

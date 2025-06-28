@@ -9,6 +9,28 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AuthIdentity struct {
+	ID           uuid.UUID          `json:"id"`
+	UserID       uuid.UUID          `json:"user_id"`
+	Provider     string             `json:"provider"`
+	ProviderID   pgtype.Text        `json:"provider_id"`
+	Email        string             `json:"email"`
+	PasswordHash pgtype.Text        `json:"password_hash"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+type RefreshToken struct {
+	ID           uuid.UUID          `json:"id"`
+	UserID       uuid.UUID          `json:"user_id"`
+	Device       pgtype.Text        `json:"device"`
+	UserAgent    pgtype.Text        `json:"user_agent"`
+	IpAddress    pgtype.Text        `json:"ip_address"`
+	RefreshToken string             `json:"refresh_token"`
+	RevokedAt    pgtype.Timestamptz `json:"revoked_at"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
 type User struct {
 	ID          uuid.UUID          `json:"id"`
 	Email       string             `json:"email"`

@@ -12,12 +12,19 @@ import (
 	userHandler "booking-app/internal/user/handler"
 	userRepo "booking-app/internal/user/repository"
 	userService "booking-app/internal/user/service"
+
+	authHandler "booking-app/internal/auth/handler"
+	authRepo "booking-app/internal/auth/repository"
+	authService "booking-app/internal/auth/service"
 	logger "booking-app/pkg"
 	"booking-app/pkg/config"
+	"booking-app/pkg/helper"
+	"booking-app/pkg/util"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
@@ -26,6 +33,16 @@ func main() {
 
 	// logger
 	logger.Init(cfg)
+
+	// helper
+	passwordHasher := helper.NewPasswordHasher(bcrypt.DefaultCost)
+
+	// utils
+	tokenManager, err := util.NewTokenManager(cfg.JWT.PrivateKeyPath, cfg.JWT.PublicKeyPath, cfg.JWT.SessionExpiration)
+	if err != nil {
+		logger.Log.Errorf("failed to create token manager: %v", err)
+		os.Exit(1)
+	}
 
 	// validator
 	validator := validator.New()
@@ -36,9 +53,11 @@ func main() {
 
 	// repository
 	userRepository := userRepo.NewUserRepository(store)
+	authRepository := authRepo.NewAuthRepository(store)
 
 	// service
 	userService := userService.NewUserService(userRepository)
+	authService := authService.NewAuthService(authRepository, userRepository, passwordHasher, tokenManager, cfg)
 
 	// setup router
 	r := chi.NewRouter()
@@ -48,6 +67,7 @@ func main() {
 		r.Route("/api/v1", func(r chi.Router) {
 			// register routes
 			userHandler.RegisterUserRoutes(r, userHandler.NewUserHandler(validator, userService))
+			authHandler.RegisterUserRoutes(r, authHandler.NewAuthHandler(validator, authService))
 		})
 	})
 

@@ -1,5 +1,7 @@
 package constants
 
+import "errors"
+
 // Validation
 const (
 	FromRequestBody = "request body"
@@ -13,8 +15,14 @@ const (
 	Error   = "error"
 )
 
+// error
+var (
+	ErrInternalServer = errors.New("internal server error")
+	ErrUnauthorized   = errors.New("unauthorized")
+)
+
 // database
 const (
-	SqlNoRows        = "Record not found"
+	SqlNoRows        = "record not found"
 	SqlAlreadyExists = "already exists"
 )

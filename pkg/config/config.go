@@ -31,8 +31,10 @@ type DBConfig struct {
 }
 
 type JWTConfig struct {
-	PrivateKeyPath string
-	PublicKeyPath  string
+	PrivateKeyPath    string
+	PublicKeyPath     string
+	SessionExpiration time.Duration
+	RefreshExpiration time.Duration
 }
 
 type RedisConfig struct {
@@ -63,8 +65,10 @@ func LoadConfig() *AppConfig {
 		},
 
 		JWT: JWTConfig{
-			PrivateKeyPath: getEnv("JWT_PRIVATE_KEY_PATH", "key/private.pem"),
-			PublicKeyPath:  getEnv("JWT_PUBLIC_KEY_PATH", "key/public.pem"),
+			PrivateKeyPath:    getEnv("JWT_PRIVATE_KEY_PATH", "key/private.pem"),
+			PublicKeyPath:     getEnv("JWT_PUBLIC_KEY_PATH", "key/public.pem"),
+			SessionExpiration: getEnvAsDuration("JWT_SESSION_EXPIRATION", 24*time.Hour),
+			RefreshExpiration: getEnvAsDuration("JWT_REFRESH_EXPIRATION", 24*time.Hour),
 		},
 
 		Redis: RedisConfig{
@@ -96,10 +100,15 @@ func getEnvAsInt(key string, fallback int) int {
 }
 
 func getEnvAsDuration(key string, fallback time.Duration) time.Duration {
-	if valStr := os.Getenv(key); valStr != "" {
-		if valInt, err := strconv.Atoi(valStr); err == nil {
-			return time.Duration(valInt) * time.Second
-		}
+	valStr := os.Getenv(key)
+	if valStr == "" {
+		return fallback
 	}
-	return fallback
+
+	dur, err := time.ParseDuration(valStr)
+	if err != nil {
+		return fallback
+	}
+
+	return dur
 }

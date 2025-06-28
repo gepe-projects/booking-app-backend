@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateUserRequest struct {
+type RegisterUserRequest struct {
 	ID          uuid.UUID
 	Email       string `json:"email" validate:"required,email"`
 	FullName    string `json:"full_name"`

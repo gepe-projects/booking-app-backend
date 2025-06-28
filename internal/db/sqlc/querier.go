@@ -11,13 +11,25 @@ import (
 )
 
 type Querier interface {
+	CreateAuthIdentity(ctx context.Context, arg CreateAuthIdentityParams) (AuthIdentity, error)
+	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserMetadata(ctx context.Context, arg CreateUserMetadataParams) error
+	DeleteAuthIdentityByID(ctx context.Context, id uuid.UUID) error
+	DeleteExpiredRefreshTokenByUserID(ctx context.Context, userID uuid.UUID) error
+	GetActiveRefreshTokensByUserID(ctx context.Context, userID uuid.UUID) ([]RefreshToken, error)
+	GetAuthByEmail(ctx context.Context, email string) (AuthIdentity, error)
+	GetAuthByProvider(ctx context.Context, arg GetAuthByProviderParams) (AuthIdentity, error)
+	GetRefreshTokenByID(ctx context.Context, id uuid.UUID) (RefreshToken, error)
+	GetRefreshTokenByToken(ctx context.Context, refreshToken string) (RefreshToken, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserMetadata(ctx context.Context, userID uuid.UUID) (UserMetadatum, error)
 	GetUserWithMetadata(ctx context.Context, id uuid.UUID) (GetUserWithMetadataRow, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	RevokeAllRefreshTokenExcept(ctx context.Context, arg RevokeAllRefreshTokenExceptParams) error
+	RevokeAllRefreshTokensByUser(ctx context.Context, userID uuid.UUID) error
+	RevokeRefreshTokenByToken(ctx context.Context, refreshToken string) error
 }
 
 var _ Querier = (*Queries)(nil)

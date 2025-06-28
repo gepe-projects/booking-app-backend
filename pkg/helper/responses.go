@@ -7,7 +7,7 @@ import (
 
 type SuccessResponse struct {
 	Status  string `json:"status"` // always "success"
-	Data    any    `json:"data"`
+	Data    any    `json:"data,omitempty"`
 	Message string `json:"message,omitempty"` // optional
 }
 
@@ -22,7 +22,7 @@ func WriteJSON(w http.ResponseWriter, statusCode int, payload any) {
 	json.NewEncoder(w).Encode(payload)
 }
 
-func WriteSuccess(w http.ResponseWriter, data any) {
+func WriteSuccess(w http.ResponseWriter, statusCode int, data any) {
 	resp := SuccessResponse{
 		Status: "success",
 		Data:   data,
