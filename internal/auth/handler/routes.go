@@ -9,5 +9,7 @@ func RegisterUserRoutes(r chi.Router, h *authHandler) {
 		r.Post("/refresh", h.RefreshToken)
 		r.Post("/logout", h.Logout)
 		r.Post("/logout-all-other-devices", h.LogoutFromOtherDevices)
+
+		r.Get("/.well-known/jwks.json", h.GetJWKS)
 	})
 }

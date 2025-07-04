@@ -220,3 +220,12 @@ func (h *authHandler) LogoutFromOtherDevices(w http.ResponseWriter, r *http.Requ
 		Message: "Logout from other devices successfully",
 	})
 }
+
+func (h *authHandler) GetJWKS(w http.ResponseWriter, r *http.Request) {
+	jwks, err := h.authService.GetJWKS()
+	if err != nil {
+		helper.WriteError(w, http.StatusInternalServerError, "failed to get JWKS")
+		return
+	}
+	helper.WriteSuccess(w, http.StatusOK, jwks)
+}

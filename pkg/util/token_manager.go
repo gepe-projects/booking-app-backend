@@ -18,6 +18,7 @@ type TokenManager interface {
 	GenerateRefreshToken() string
 	GenerateCSRFToken(userID uuid.UUID) (string, jwt.RegisteredClaims, error)
 	ParseCSRFToken(token string, userID uuid.UUID) bool
+	GetPublicKey() *rsa.PublicKey
 }
 
 type CustomClaims struct {
@@ -139,4 +140,9 @@ func (jm *jwtManager) ParseCSRFToken(tokenStr string, userID uuid.UUID) bool {
 	}
 
 	return false
+}
+
+// GetPublicKey mengembalikan public key, digunakan untuk verifikasi token dari service lain atau frontend
+func (jm *jwtManager) GetPublicKey() *rsa.PublicKey {
+	return jm.publicKey
 }

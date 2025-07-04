@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"errors"
+	"math/big"
 	"time"
 
 	"booking-app/internal/auth/dto"
@@ -25,6 +27,7 @@ type AuthService interface {
 	RefreshToken(ctx context.Context, req dto.RequestRefreshToken) (dto.ResponseRefreshToken, error)
 	Logout(ctx context.Context, refreshToken string) error
 	LogoutAllOtherDevices(ctx context.Context, refreshToken string) error
+	GetJWKS() (any, error)
 }
 
 type authService struct {
@@ -277,4 +280,21 @@ func (s *authService) LogoutAllOtherDevices(ctx context.Context, refreshToken st
 		UserID: rt.UserID,
 		ID:     rt.ID,
 	})
+}
+
+func (s *authService) GetJWKS() (any, error) {
+	pubKey := s.tokenManager.GetPublicKey()
+
+	jwk := map[string]any{
+		"kty": "RSA",
+		"alg": "RS256",
+		"use": "sig",
+		"kid": "booking-auth-key",
+		"n":   base64.RawURLEncoding.EncodeToString(pubKey.N.Bytes()),
+		"e":   base64.RawURLEncoding.EncodeToString(big.NewInt(int64(pubKey.E)).Bytes()),
+	}
+
+	return map[string]any{
+		"keys": []any{jwk},
+	}, nil
 }
