@@ -6,6 +6,7 @@ import (
 	db "booking-app/internal/db/sqlc"
 	"booking-app/pkg/util"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -23,6 +24,7 @@ type LoginResponse struct {
 	User          UserLoginResponse
 	AccessClaims  *util.CustomClaims           `json:"access_claims,omitempty"`
 	RefreshClaims *db.CreateRefreshTokenParams `json:"refresh_claims,omitempty"`
+	CsrfClaims    *jwt.RegisteredClaims        `json:"csrf_claims,omitempty"`
 }
 
 type RegisterRequest struct {
@@ -35,6 +37,7 @@ type RegisterRequest struct {
 type TokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
+	CsrfToken    string `json:"csrf_token,omitempty"`
 }
 
 type UserLoginResponse struct {
@@ -60,6 +63,7 @@ type ResponseRefreshToken struct {
 	TokenResponse
 	AccessClaims  *util.CustomClaims           `json:"access_claims,omitempty"`
 	RefreshClaims *db.CreateRefreshTokenParams `json:"refresh_claims,omitempty"`
+	CsrfClaims    *jwt.RegisteredClaims
 }
 
 type RequestLogout struct {

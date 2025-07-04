@@ -16,6 +16,8 @@ type TokenManager interface {
 	GenerateAccessToken(claims CustomClaims) (string, *CustomClaims, error)
 	ParseAccessToken(tokenStr string) (*CustomClaims, error)
 	GenerateRefreshToken() string
+	GenerateCSRFToken(userID uuid.UUID) (string, jwt.RegisteredClaims, error)
+	ParseCSRFToken(token string, userID uuid.UUID) bool
 }
 
 type CustomClaims struct {
@@ -27,10 +29,9 @@ type CustomClaims struct {
 }
 
 type jwtManager struct {
-	privateKey       *rsa.PrivateKey
-	publicKey        *rsa.PublicKey
-	accessTTL        time.Duration
-	refreshAccessTTL time.Duration
+	privateKey *rsa.PrivateKey
+	publicKey  *rsa.PublicKey
+	accessTTL  time.Duration
 }
 
 func NewTokenManager(privateKeyPath, publicKeyPath string, accessTTL time.Duration) (tokenManager TokenManager, err error) {
@@ -101,4 +102,41 @@ func (jm *jwtManager) ParseAccessToken(tokenStr string) (*CustomClaims, error) {
 
 func (jm *jwtManager) GenerateRefreshToken() string {
 	return uuid.NewString()
+}
+
+func (jm *jwtManager) GenerateCSRFToken(userID uuid.UUID) (string, jwt.RegisteredClaims, error) {
+	now := time.Now()
+	claims := jwt.RegisteredClaims{
+		Subject:   userID.String(),
+		IssuedAt:  jwt.NewNumericDate(now),
+		ExpiresAt: jwt.NewNumericDate(now.Add(jm.accessTTL)),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	tokenString, err := token.SignedString(jm.privateKey)
+
+	return tokenString, claims, err
+}
+
+func (jm *jwtManager) ParseCSRFToken(tokenStr string, userID uuid.UUID) bool {
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			logger.Log.Errorf("ATTACK ALLERT CSRF: unexpected signing method in csrf: %v", t.Header["alg"])
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return jm.publicKey, nil
+	})
+	if err != nil {
+		logger.Log.Errorf("ATTACK ALLERT CSRF: failed to parse csrf token: %v", err)
+		return false
+	}
+
+	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
+		if claims.Subject != userID.String() {
+			logger.Log.Errorf("ATTACK ALLERT CSRF: userID mismatch: %v", err)
+			return false
+		}
+		return true
+	}
+
+	return false
 }

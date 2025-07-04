@@ -127,6 +127,7 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (tokenRes
 	token, claimsRes, err := s.tokenManager.GenerateAccessToken(claims)
 	if err != nil {
 		logger.Log.Errorf("failed to generate access token: %v", err)
+		err = constants.ErrInternalServer
 		return
 	}
 
@@ -145,13 +146,22 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (tokenRes
 		return
 	}
 
+	// generate csrf
+	csrf, csrfClaims, err := s.tokenManager.GenerateCSRFToken(user.ID)
+	if err != nil {
+		logger.Log.Errorf("failed to generate csrf token: %v", err)
+		return
+	}
+
 	tokenResponse = dto.LoginResponse{
 		TokenResponse: dto.TokenResponse{
 			AccessToken:  token,
 			RefreshToken: refresh.RefreshToken,
+			CsrfToken:    csrf,
 		},
 		AccessClaims:  claimsRes,
 		RefreshClaims: &refreshArg,
+		CsrfClaims:    &csrfClaims,
 		User: dto.UserLoginResponse{
 			ID:          user.ID,
 			Email:       user.Email,
@@ -228,13 +238,22 @@ func (s *authService) RefreshToken(ctx context.Context, req dto.RequestRefreshTo
 		logger.Log.Warnf("failed to revoke old refresh token: %v", err)
 	}
 
+	// generate csrf
+	csrf, csrfClaims, err := s.tokenManager.GenerateCSRFToken(user.ID)
+	if err != nil {
+		logger.Log.Errorf("failed to generate csrf token: %v", err)
+		return
+	}
+
 	tokenResponse = dto.ResponseRefreshToken{
 		TokenResponse: dto.TokenResponse{
 			AccessToken:  token,
 			RefreshToken: refresh.RefreshToken,
+			CsrfToken:    csrf,
 		},
 		AccessClaims:  claimsAccess,
 		RefreshClaims: &refreshArg,
+		CsrfClaims:    &csrfClaims,
 	}
 
 	return

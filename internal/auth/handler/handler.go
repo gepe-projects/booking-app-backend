@@ -87,6 +87,15 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Expires:  responseLogin.RefreshClaims.ExpiresAt.Time,
 	})
 
+	http.SetCookie(w, &http.Cookie{
+		Name:     "csrf_token",
+		Value:    responseLogin.CsrfToken,
+		Path:     "/",
+		HttpOnly: false,
+		SameSite: http.SameSiteDefaultMode,
+		Expires:  responseLogin.CsrfClaims.ExpiresAt.Time,
+	})
+
 	helper.WriteSuccess(w, http.StatusOK, dto.LoginResponse{
 		TokenResponse: dto.TokenResponse{
 			AccessToken:  responseLogin.AccessToken,
@@ -133,6 +142,15 @@ func (h *authHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		SameSite: http.SameSiteDefaultMode,
 		Expires:  res.RefreshClaims.ExpiresAt.Time,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "csrf_token",
+		Value:    res.CsrfToken,
+		Path:     "/",
+		HttpOnly: false,
+		SameSite: http.SameSiteDefaultMode,
+		Expires:  res.CsrfClaims.ExpiresAt.Time,
 	})
 
 	helper.WriteSuccess(w, http.StatusOK, map[string]any{
