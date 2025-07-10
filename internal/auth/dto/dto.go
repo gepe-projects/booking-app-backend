@@ -21,7 +21,7 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	TokenResponse
-	User          UserLoginResponse
+	User          UserLoginResponse            `json:"user"`
 	AccessClaims  *util.CustomClaims           `json:"access_claims,omitempty"`
 	RefreshClaims *db.CreateRefreshTokenParams `json:"refresh_claims,omitempty"`
 	CsrfClaims    *jwt.RegisteredClaims        `json:"csrf_claims,omitempty"`
