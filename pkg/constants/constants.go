@@ -3,9 +3,9 @@ package constants
 import "errors"
 
 // context
-type CtxKey string
+type ctxKey string
 
-var CtxUser CtxKey = "user"
+var CtxUser ctxKey = "user"
 
 // Validation
 const (

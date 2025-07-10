@@ -19,6 +19,7 @@ import (
 	logger "booking-app/pkg"
 	"booking-app/pkg/config"
 	"booking-app/pkg/helper"
+	middlewares "booking-app/pkg/middleware"
 	"booking-app/pkg/util"
 
 	"github.com/go-chi/chi/v5"
@@ -59,15 +60,21 @@ func main() {
 	userService := userService.NewUserService(userRepository)
 	authService := authService.NewAuthService(authRepository, userRepository, passwordHasher, tokenManager, cfg)
 
+	// middleware
+	mw := middlewares.NewMiddleware(tokenManager)
+
+	// handler
+	authHandler := authHandler.NewAuthRoutes(mw, validator, authService)
+	userHandler := userHandler.NewUserRoutes(mw, validator, userService)
+
 	// setup router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Group(func(r chi.Router) {
 		r.Route("/api/v1", func(r chi.Router) {
-			// register routes
-			userHandler.RegisterUserRoutes(r, userHandler.NewUserHandler(validator, userService))
-			authHandler.RegisterUserRoutes(r, authHandler.NewAuthHandler(validator, authService))
+			authHandler.MountAuthRoutes(r)
+			userHandler.MountUserRoutes(r)
 		})
 	})
 

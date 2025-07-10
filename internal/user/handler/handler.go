@@ -19,7 +19,7 @@ type userHandler struct {
 	userService userService.UserService
 }
 
-func NewUserHandler(validator *validator.Validate, userService userService.UserService) *userHandler {
+func newUserHandler(validator *validator.Validate, userService userService.UserService) *userHandler {
 	return &userHandler{
 		validate:    validator,
 		userService: userService,

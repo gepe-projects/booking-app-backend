@@ -8,6 +8,7 @@ import (
 	as "booking-app/internal/auth/service"
 	"booking-app/pkg/constants"
 	"booking-app/pkg/helper"
+	"booking-app/pkg/util"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -17,11 +18,20 @@ type authHandler struct {
 	authService as.AuthService
 }
 
-func NewAuthHandler(validator *validator.Validate, authService as.AuthService) *authHandler {
+func newAuthHandler(validator *validator.Validate, authService as.AuthService) *authHandler {
 	return &authHandler{
 		validate:    validator,
 		authService: authService,
 	}
+}
+
+func (h *authHandler) Me(w http.ResponseWriter, r *http.Request) {
+	claims, ok := r.Context().Value(constants.CtxUser).(*util.CustomClaims)
+	if !ok {
+		helper.WriteError(w, http.StatusInternalServerError, "User not found")
+		return
+	}
+	helper.WriteSuccess(w, http.StatusOK, claims)
 }
 
 func (h *authHandler) Register(w http.ResponseWriter, r *http.Request) {
