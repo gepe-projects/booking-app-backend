@@ -2,6 +2,11 @@ package constants
 
 import "errors"
 
+// context
+type CtxKey string
+
+var CtxUser CtxKey = "user"
+
 // Validation
 const (
 	FromRequestBody = "request body"
