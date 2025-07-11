@@ -29,7 +29,9 @@ func newUserHandler(validator *validator.Validate, userService userService.UserS
 func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterUserRequest
 	if err := helper.BindRequest(r, &req); err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 	if err := h.validate.Struct(&req); err != nil {
@@ -42,7 +44,9 @@ func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userService.CreateUser(r.Context(), req)
 	if err != nil {
-		helper.WriteError(w, http.StatusInternalServerError, err.Error())
+		helper.WriteError(w, http.StatusInternalServerError, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -62,7 +66,9 @@ func (h *userHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	users, err := h.userService.ListUsers(r.Context(), arg)
 	if err != nil {
-		helper.WriteError(w, http.StatusInternalServerError, err.Error())
+		helper.WriteError(w, http.StatusInternalServerError, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -72,12 +78,16 @@ func (h *userHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 func (h *userHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	uuid, err := helper.ParseUUID(chi.URLParam(r, "id"))
 	if err != nil {
-		helper.WriteError(w, http.StatusBadRequest, "UUID is not valid")
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": "UUID is not valid",
+		})
 		return
 	}
 	user, err := h.userService.GetUserByID(r.Context(), uuid)
 	if err != nil {
-		helper.WriteError(w, http.StatusInternalServerError, err.Error())
+		helper.WriteError(w, http.StatusInternalServerError, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 

@@ -14,19 +14,25 @@ func (mw *middleware) AuthMiddleware(next http.Handler) http.Handler {
 		// 1. check if user is authenticated
 		authorization := r.Header.Get("Authorization")
 		if authorization == "" {
-			helper.WriteError(w, http.StatusUnauthorized, constants.ErrUnauthorized.Error())
+			helper.WriteError(w, http.StatusUnauthorized, map[string]any{
+				"error": constants.ErrUnauthorized.Error(),
+			})
 			return
 		}
 
 		token := strings.Split(authorization, "Bearer ")[1]
 		if token == "" {
-			helper.WriteError(w, http.StatusUnauthorized, constants.ErrUnauthorized.Error())
+			helper.WriteError(w, http.StatusUnauthorized, map[string]any{
+				"error": constants.ErrUnauthorized.Error(),
+			})
 			return
 		}
 
 		claims, err := mw.tokenManager.ParseAccessToken(token)
 		if err != nil {
-			helper.WriteError(w, http.StatusUnauthorized, constants.ErrUnauthorized.Error())
+			helper.WriteError(w, http.StatusUnauthorized, map[string]any{
+				"error": constants.ErrUnauthorized.Error(),
+			})
 			return
 		}
 

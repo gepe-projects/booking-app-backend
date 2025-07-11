@@ -38,7 +38,7 @@ func WriteCreated(w http.ResponseWriter, data any) {
 	WriteJSON(w, http.StatusCreated, resp)
 }
 
-func WriteError(w http.ResponseWriter, statusCode int, err any) {
+func WriteError(w http.ResponseWriter, statusCode int, err map[string]any) {
 	resp := ErrorResponse{
 		Status: "error",
 		Errors: err,

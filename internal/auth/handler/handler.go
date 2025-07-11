@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"booking-app/internal/auth/dto"
@@ -28,7 +27,9 @@ func newAuthHandler(validator *validator.Validate, authService as.AuthService) *
 func (h *authHandler) Me(w http.ResponseWriter, r *http.Request) {
 	claims, ok := r.Context().Value(constants.CtxUser).(*util.CustomClaims)
 	if !ok {
-		helper.WriteError(w, http.StatusInternalServerError, "User not found")
+		helper.WriteError(w, http.StatusInternalServerError, map[string]any{
+			"error": "User not found",
+		})
 		return
 	}
 	helper.WriteSuccess(w, http.StatusOK, claims)
@@ -37,7 +38,9 @@ func (h *authHandler) Me(w http.ResponseWriter, r *http.Request) {
 func (h *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterRequest
 	if err := helper.BindRequest(r, &req); err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 	if err := h.validate.Struct(&req); err != nil {
@@ -47,7 +50,9 @@ func (h *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.authService.Register(r.Context(), req); err != nil {
-		helper.WriteError(w, http.StatusInternalServerError, err.Error())
+		helper.WriteError(w, http.StatusInternalServerError, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -60,7 +65,9 @@ func (h *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginRequest
 	if err := helper.BindRequest(r, &req); err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 	if err := h.validate.Struct(&req); err != nil {
@@ -74,7 +81,9 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	responseLogin, err := h.authService.Login(r.Context(), req)
 	if err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -118,7 +127,9 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *authHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	var req dto.RequestRefreshToken
 	if err := helper.BindRequest(r, &req); err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 	if err := h.validate.Struct(&req); err != nil {
@@ -131,7 +142,9 @@ func (h *authHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	req.IpAddress = r.RemoteAddr
 	res, err := h.authService.RefreshToken(r.Context(), req)
 	if err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -173,7 +186,9 @@ func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	// ambil token dari cookie
 	cookie, err := r.Cookie("refresh_token")
 	if err != nil {
-		helper.WriteError(w, http.StatusBadRequest, errors.New("missing refresh token"))
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": "missing refresh token",
+		})
 		return
 	}
 	refreshToken := cookie.Value
@@ -181,7 +196,9 @@ func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	// revoke RT
 	err = h.authService.Logout(r.Context(), refreshToken)
 	if err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -213,7 +230,9 @@ func (h *authHandler) LogoutFromOtherDevices(w http.ResponseWriter, r *http.Requ
 	// ambil token dari cookie
 	cookie, err := r.Cookie("refresh_token")
 	if err != nil {
-		helper.WriteError(w, http.StatusBadRequest, errors.New("missing refresh token"))
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": "missing refresh token",
+		})
 		return
 	}
 	refreshToken := cookie.Value
@@ -221,7 +240,9 @@ func (h *authHandler) LogoutFromOtherDevices(w http.ResponseWriter, r *http.Requ
 	// revoke RT
 	err = h.authService.LogoutAllOtherDevices(r.Context(), refreshToken)
 	if err != nil {
-		helper.WriteError(w, http.StatusBadRequest, err.Error())
+		helper.WriteError(w, http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -234,7 +255,9 @@ func (h *authHandler) LogoutFromOtherDevices(w http.ResponseWriter, r *http.Requ
 func (h *authHandler) GetJWKS(w http.ResponseWriter, r *http.Request) {
 	jwks, err := h.authService.GetJWKS()
 	if err != nil {
-		helper.WriteError(w, http.StatusInternalServerError, "failed to get JWKS")
+		helper.WriteError(w, http.StatusInternalServerError, map[string]any{
+			"error": "failed to get JWKS",
+		})
 		return
 	}
 	helper.WriteSuccess(w, http.StatusOK, jwks)

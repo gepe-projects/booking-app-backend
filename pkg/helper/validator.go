@@ -7,10 +7,10 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func GenerateMessage(err error, source string) map[string]string {
+func GenerateMessage(err error, source string) map[string]any {
 	var vErr validator.ValidationErrors
 	if errors.As(err, &vErr) {
-		messages := make(map[string]string, len(vErr))
+		messages := make(map[string]any, len(vErr))
 		for _, v := range vErr {
 			switch v.Tag() {
 			case "email":
@@ -55,5 +55,5 @@ func GenerateMessage(err error, source string) map[string]string {
 		}
 		return messages
 	}
-	return map[string]string{"error": err.Error()}
+	return map[string]any{"error": err.Error()}
 }
